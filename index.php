@@ -1,9 +1,13 @@
 <?php
+session_start();
 require("function.php");
 
 $result = $conn->query("SELECT * FROM products");
+if (!isset($_SESSION['login'])) {
+    header("Location: login.php");
+    exit;
+}
 
-session_start();
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
@@ -44,255 +48,53 @@ if (isset($_GET['remove'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Shop</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function confirmLogout() {
+            if (confirm("Apakah kamu yakin ingin Log out?")) {
+                window.location.href = "logout.php";
+            }
         }
-
-        nav {
-            background-color: #343a40;
-            color: white;
-            width: 100%;
-            padding: 5px 0px 5px 0px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        nav h1 {
-            margin-left: 10px;
-        }
-
-        nav ul {
-            list-style-type: none;
-            margin: 0;
-            margin-right: 25px;
-            padding: 0;
-            display: flex;
-            gap: 1em;
-        }
-
-        nav ul li {
-            display: inline;
-        }
-
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-        }
-
-
-
-        /* items */
-        .card {
-            --font-color: #fefefe;
-            --font-color-sub: #7e7e7e;
-            --bg-color: #111;
-            --main-color: #fefefe;
-            --main-focus: #2d8cf0;
-            width: 230px;
-            height: 300px;
-            background: var(--bg-color);
-            border: 2px solid var(--main-color);
-            box-shadow: 4px 4px var(--main-color);
-            border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            padding: 20px;
-            gap: 10px;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        }
-
-        .card:last-child {
-            justify-content: flex-end;
-        }
-
-        .card-img {
-            /* clear and add new css */
-            transition: all 0.5s;
-            display: flex;
-            justify-content: center;
-        }
-
-        .card-img .img {
-            /* delete */
-            transform: scale(1);
-            position: relative;
-            box-sizing: border-box;
-            width: 100px;
-            height: 100px;
-            border-top-left-radius: 80px 50px;
-            border-top-right-radius: 80px 50px;
-            border: 2px solid black;
-            background-color: #228b22;
-            background-image: linear-gradient(to top, transparent 10px, rgba(0, 0, 0, 0.3) 10px, rgba(0, 0, 0, 0.3) 13px, transparent 13px);
-        }
-
-        .card-img .img::before {
-            /* delete */
-            content: '';
-            position: absolute;
-            width: 65px;
-            height: 110px;
-            margin-left: -32.5px;
-            left: 50%;
-            bottom: -4px;
-            background-repeat: no-repeat;
-            background-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.7) 30%, transparent 30%), linear-gradient(to top, transparent 17px, rgba(0, 0, 0, 0.3) 17px, rgba(0, 0, 0, 0.3) 20px, transparent 20px), linear-gradient(to right, black 2px, transparent 2px), linear-gradient(to left, black 2px, transparent 2px), linear-gradient(to top, black 2px, #228b22 2px);
-            background-size: 60% 10%, 100% 100%, 100% 65%, 100% 65%, 100% 50%;
-            background-position: center 3px, center bottom, center bottom, center bottom, center bottom;
-            border-radius: 0 0 4px 4px;
-            z-index: 2;
-        }
-
-        .card-img .img::after {
-            /* delete */
-            content: '';
-            position: absolute;
-            box-sizing: border-box;
-            width: 28px;
-            height: 28px;
-            margin-left: -14px;
-            left: 50%;
-            top: -13px;
-            background-repeat: no-repeat;
-            background-image: linear-gradient(80deg, #ffc0cb 45%, transparent 45%), linear-gradient(-175deg, #ffc0cb 45%, transparent 45%), linear-gradient(80deg, rgba(0, 0, 0, 0.2) 51%, rgba(0, 0, 0, 0) 51%), linear-gradient(-175deg, rgba(0, 0, 0, 0.2) 51%, rgba(0, 0, 0, 0) 51%), radial-gradient(circle at center, #ffa6b6 45%, rgba(0, 0, 0, 0.2) 45%, rgba(0, 0, 0, 0.2) 52%, rgba(0, 0, 0, 0) 52%), linear-gradient(45deg, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, 0.2) 48%, rgba(0, 0, 0, 0.2) 52%, rgba(0, 0, 0, 0) 52%), linear-gradient(65deg, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, 0.2) 48%, rgba(0, 0, 0, 0.2) 52%, rgba(0, 0, 0, 0) 52%), linear-gradient(22deg, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, 0.2) 48%, rgba(0, 0, 0, 0.2) 54%, rgba(0, 0, 0, 0) 54%);
-            background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 75%, 100% 95%, 100% 60%;
-            background-position: center center;
-            border-top-left-radius: 120px;
-            border-top-right-radius: 10px;
-            border-bottom-left-radius: 10px;
-            border-bottom-right-radius: 70px;
-            border-top: 2px solid black;
-            border-left: 2px solid black;
-            transform: rotate(45deg);
-            z-index: 1;
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 500;
-            text-align: center;
-            color: var(--font-color);
-        }
-
-        .card-subtitle {
-            font-size: 14px;
-            font-weight: 400;
-            color: var(--font-color-sub);
-        }
-
-        .card-divider {
-            width: 100%;
-            border: 1px solid var(--main-color);
-            border-radius: 50px;
-        }
-
-        .card-footer {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-price {
-            font-size: 20px;
-            font-weight: 500;
-            color: var(--font-color);
-        }
-
-        .card-price span {
-            font-size: 20px;
-            font-weight: 500;
-            color: var(--font-color-sub);
-        }
-
-        .card-btn {
-            height: 35px;
-            background: var(--bg-color);
-            border: 2px solid var(--main-color);
-            border-radius: 5px;
-            padding: 0 15px;
-            transition: all 0.3s;
-        }
-
-        .card-btn svg {
-            width: 100%;
-            height: 100%;
-            fill: var(--main-color);
-            transition: all 0.3s;
-        }
-
-        .card-img:hover {
-            transform: translateY(-3px);
-        }
-
-        .card-btn:hover {
-            border: 2px solid var(--main-focus);
-        }
-
-        .card-btn:hover svg {
-            fill: var(--main-focus);
-        }
-
-        .card-btn:active {
-            transform: translateY(3px);
-        }
-        .all{
-            display: flex;
-        }
-    </style>
+    </script>
 </head>
 
-<body>
-    <!-- nav -->
-    <nav>
-        <h1>Product List</h1>
-        <ul>
-            <li><a href="login.php">LOGIN</a></li>
-            <li><a href="regis.php">REGISTRASI</a></li>
-            <li><a href="cart.php">keranjang</a></li>
-        </ul>
+<body class="bg-gray-100">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">My Shop</h1>
+            <ul class="flex space-x-4">
+                <li>
+                    <a href="cart.php" class="flex items-center hover:underline">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.34 2M7 13h10l1.38-7H6.34L5 4H3m0 0h2l.34 2m0 0h12.64l1.38-7H6.34L5 4H3m4 10v6m0 0H7m0 0v6m4-6v6m0 0h-2m0 0v6m8-6v6m0 0h-2m0 0v6m-4-6v6m0 0h-2m0 0v6"></path>
+                        </svg>
+                        Keranjang
+                    </a>
+                </li>
+                <li><button onclick="confirmLogout()" class="bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded">Log out</button></li>
+            </ul>
+        </div>
     </nav>
 
-
-    <div class="all">
+    <!-- Product List -->
+    <div class="container mx-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php while ($row = $result->fetch_assoc()) : ?>
-            <!--  -->
-            <div class="card">
-                <div class="card-img">
-                    <div class="img"></div>
-                </div>
-                <div class="card-title"><?= htmlspecialchars($row['product_name']) ?></div>
-                <div class="card-subtitle">Product description. Lorem ipsum dolor sit amet, consectetur adipisicing elit.</div>
-                <hr class="card-divider">
-                <div class="card-footer">
-                    <div class="card-price"><?= htmlspecialchars($row['price']) ?>K</div>
-                    <button class="card-btn" type="submit" name="masuk">
-                        <a href="index.php?add=<?= $row['products_id'] ?>">
-                            <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                                <path d="m397.78 316h-205.13a15 15 0 0 1 -14.65-11.67l-34.54-150.48a15 15 0 0 1 14.62-18.36h274.27a15 15 0 0 1 14.65 18.36l-34.6 150.48a15 15 0 0 1 -14.62 11.67zm-193.19-30h181.25l27.67-120.48h-236.6z"></path>
-                                <path d="m222 450a57.48 57.48 0 1 1 57.48-57.48 57.54 57.54 0 0 1 -57.48 57.48zm0-84.95a27.48 27.48 0 1 0 27.48 27.47 27.5 27.5 0 0 0 -27.48-27.47z"></path>
-                                <path d="m368.42 450a57.48 57.48 0 1 1 57.48-57.48 57.54 57.54 0 0 1 -57.48 57.48zm0-84.95a27.48 27.48 0 1 0 27.48 27.47 27.5 27.5 0 0 0 -27.48-27.47z"></path>
-                                <path d="m158.08 165.49a15 15 0 0 1 -14.23-10.26l-25.71-77.23h-47.44a15 15 0 1 1 0-30h58.3a15 15 0 0 1 14.23 10.26l29.13 87.49a15 15 0 0 1 -14.23 19.74z"></path>
-                            </svg>
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-4">
+                    <h2 class="text-lg font-semibold"><?= htmlspecialchars($row['product_name']) ?></h2>
+                    <p class="text-gray-700">Product description. Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+                    <div class="flex items-center justify-between mt-4">
+                        <span class="text-gray-900 font-bold"><?= htmlspecialchars($row['price']) ?>K</span>
+                        <a href="index.php?add=<?= $row['products_id'] ?>" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            Add to Cart
                         </a>
-                    </button>
+                    </div>
                 </div>
             </div>
         <?php endwhile; ?>
     </div>
-
-    <!-- <a href="create.php">admin</a> -->
-    <!-- udah di kasih style -->
-
 
 </body>
 

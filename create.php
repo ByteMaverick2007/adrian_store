@@ -1,6 +1,13 @@
 <?php
 require("function.php");
 
+if (
+    !isset($_SESSION['login'])
+) {
+    header("Location: login.php");
+    exit;
+}
+
 if (isset($_POST['submit'])) {
     $product_name = $_POST['product_name'];
     $price = $_POST['price'];

@@ -2,6 +2,13 @@
 session_start();
 require("function.php");
 
+if (
+    !isset($_SESSION['login'])
+) {
+    header("Location: login.php");
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $_SESSION['cart'] = [];
