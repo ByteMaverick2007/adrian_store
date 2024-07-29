@@ -2,23 +2,40 @@
 session_start();
 require("function.php");
 
-if (
-    !isset($_SESSION['login'])
-) {
+if (!isset($_SESSION['login'])) {
     header("Location: login.php");
-    exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-    $_SESSION['cart'] = [];
-    header("Location: index.php");
     exit;
 }
 
 $total = 0;
 foreach ($_SESSION['cart'] as $item) {
     $total += $item['price'] * $item['quantity'];
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $conn = new mysqli("localhost","root","","toko");
+
+    // Check the connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    // Prepare and bind
+    $stmt = $conn->prepare("INSERT INTO orders (id, total) VALUES (?, ?)");
+    $stmt->bind_param("id", $_SESSION['id'], $total);
+
+    // Execute the statement
+    if ($stmt->execute()) {
+        $_SESSION['cart'] = [];
+        header("Location: index.php");
+        exit;
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+
+    // Close the statement and connection
+    $stmt->close();
+    $conn->close();
 }
 ?>
 
